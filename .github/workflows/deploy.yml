@@ -1,0 +1,43 @@
+name: Deploy Quote App to Azure
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Load .env file for Terraform & Docker
+        run: |
+          echo "Loading environment variables"
+          set -a
+          source environments/development/.env
+          export ACR_NAME=$TF_VAR_acr_name
+          export ACR_LOGIN_SERVER=$ACR_NAME.azurecr.io
+          export NODE_ENV=$NODE_ENV
+          set +a
+
+      - name: Set up Node.js and Yarn
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Enable Yarn (via Corepack)
+        run: |
+          corepack enable
+          corepack prepare yarn@stable --activate
+
+      - name: Install dependencies & build
+        run: |
+          yarn install --frozen-lockfile
+          yarn build
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
