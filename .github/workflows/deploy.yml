@@ -8,19 +8,17 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    env:
+      ACR_NAME: ${{ secrets.ACR_NAME }}
+      ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
+      NODE_ENV: ${{ secrets.NODE_ENV }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      REDIS_URL: ${{ secrets.REDIS_URL }}
+      TF_VAR_webapp_name: ${{ secrets.WEB_APP_NAME }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Load .env file for Terraform & Docker
-        run: |
-          echo "Loading environment variables from .env"
-          set -a
-          source .env
-          export ACR_NAME=$TF_VAR_acr_name
-          export ACR_LOGIN_SERVER=$ACR_NAME.azurecr.io
-          export NODE_ENV=$NODE_ENV
-          set +a
 
       - name: Set up Node.js and Yarn
         uses: actions/setup-node@v3
@@ -58,5 +56,5 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: $TF_VAR_webapp_name
-          images: $ACR_LOGIN_SERVER/quoteapp:latest
+          app-name: ${{ env.TF_VAR_webapp_name }}
+          images: ${{ env.ACR_LOGIN_SERVER }}/quoteapp:latest
