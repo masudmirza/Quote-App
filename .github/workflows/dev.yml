@@ -2,11 +2,12 @@ name: Deploy Quote App to Azure
 
 on:
   push:
-    branches: [main]
+    branches: [main] # change to match your env deployment rules
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: development # GitHub environment name
 
     env:
       ACR_NAME: ${{ secrets.ACR_NAME }}
@@ -14,19 +15,11 @@ jobs:
       NODE_ENV: ${{ secrets.NODE_ENV }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       REDIS_URL: ${{ secrets.REDIS_URL }}
-      TF_VAR_webapp_name: ${{ secrets.WEB_APP_NAME }}
+      WEB_APP_NAME: ${{ secrets.WEB_APP_NAME }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Log environment variables (non-sensitive)
-        run: |
-          echo "ACR_NAME: $ACR_NAME"
-          echo "ACR_LOGIN_SERVER: $ACR_LOGIN_SERVER"
-          echo "NODE_ENV: $NODE_ENV"
-          echo "TF_VAR_webapp_name: $TF_VAR_webapp_name"
-        shell: bash
 
       - name: Set up Node.js and Yarn
         uses: actions/setup-node@v3
@@ -64,5 +57,5 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ env.TF_VAR_webapp_name }}
+          app-name: ${{ env.WEB_APP_NAME }}
           images: ${{ env.ACR_LOGIN_SERVER }}/quoteapp:latest
