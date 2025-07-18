@@ -16,7 +16,7 @@ jobs:
         run: |
           echo "Loading environment variables"
           set -a
-          source environments/development/.env
+          source .env
           export ACR_NAME=$TF_VAR_acr_name
           export ACR_LOGIN_SERVER=$ACR_NAME.azurecr.io
           export NODE_ENV=$NODE_ENV
