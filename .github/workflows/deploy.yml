@@ -20,6 +20,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Log environment variables (non-sensitive)
+        run: |
+          echo "ACR_NAME: $ACR_NAME"
+          echo "ACR_LOGIN_SERVER: $ACR_LOGIN_SERVER"
+          echo "NODE_ENV: $NODE_ENV"
+          echo "TF_VAR_webapp_name: $TF_VAR_webapp_name"
+        shell: bash
+
       - name: Set up Node.js and Yarn
         uses: actions/setup-node@v3
         with:
