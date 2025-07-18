@@ -10,7 +10,7 @@ jobs:
     environment: development # GitHub environment name
 
     env:
-      SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
+      ACR_NAME: ${{ secrets.ACR_NAME }}
       ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
       NODE_ENV: ${{ secrets.NODE_ENV }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -38,7 +38,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: ACR Login
-        run: az acr login --name $SUBSCRIPTION_ID
+        run: az acr login --name $ACR_NAME
 
       - name: Build and Push Docker Image
         run: |
