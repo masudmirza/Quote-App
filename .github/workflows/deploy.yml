@@ -14,7 +14,7 @@ jobs:
 
       - name: Load .env file for Terraform & Docker
         run: |
-          echo "Loading environment variables"
+          echo "Loading environment variables from .env"
           set -a
           source .env
           export ACR_NAME=$TF_VAR_acr_name
@@ -26,11 +26,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20
-
-      - name: Enable Yarn (via Corepack)
-        run: |
-          corepack enable
-          corepack prepare yarn@stable --activate
+          cache: "yarn"
 
       - name: Install dependencies & build
         run: |
@@ -41,3 +37,26 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: ACR Login
+        run: az acr login --name $ACR_NAME
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build \
+            --build-arg NODE_ENV=$NODE_ENV \
+            --build-arg DATABASE_URL=$DATABASE_URL \
+            --build-arg REDIS_URL=$REDIS_URL \
+            -t $ACR_LOGIN_SERVER/quoteapp:latest .
+          docker push $ACR_LOGIN_SERVER/quoteapp:latest
+
+      - name: Terraform Init & Apply
+        run: |
+          terraform init
+          terraform apply -auto-approve
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: $TF_VAR_webapp_name
+          images: $ACR_LOGIN_SERVER/quoteapp:latest
